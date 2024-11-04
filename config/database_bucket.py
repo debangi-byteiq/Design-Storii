@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+
 # MySQL RDS Config
 DB_USER = os.getenv("DB_USER")
 PASSWORD = os.getenv("PASSWORD")
