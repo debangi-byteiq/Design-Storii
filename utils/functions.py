@@ -76,6 +76,21 @@ def find_metal_colour(text):
             return colour
     return None
 
+def convert_currency(price, rate):
+    """
+    This method converts price based on the rate.
+    Args:
+        price: Price of the product.
+        rate: Rate to which the price needs to be converted.
+
+    Returns: Converted price in floating point format.
+
+    """
+    try:
+        return round(float(price)/rate, 3)
+    except:
+        return None
+
 
 def open_new_page(browser):
     """
