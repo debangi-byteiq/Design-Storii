@@ -74,12 +74,12 @@ def find_metal_details(soup):
             details['MetalPurity'] = int(match.group(1))
         except:
             details['MetalPurity'] = None
-    elif metal['metal name'] is not None and 'gold' 'platinum' in metal['metal name'].lower():
+    elif metal['metal name'] is not None and 'platinum' in metal['metal name'].lower():
         details['MetalType'] = 'Platinum'
         details['MetalColour'] = None
         details['MetalPurity'] = None
-    elif metal['metal name'] is not None and 'gold' 'silver' in metal['metal name'].lower():
-        details['MetalType'] = 'Sterling Silver'
+    elif metal['metal name'] is not None and 'silver' in metal['metal name'].lower():
+        details['MetalType'] = 'Silver'
         details['MetalColour'] = None
         details['MetalPurity'] = None
     else:
