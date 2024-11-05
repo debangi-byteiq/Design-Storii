@@ -1,2 +1,7 @@
 .env
 .idea
+
+# Ignore specific directories
+config/__pycache__/
+models/__pycache__/
+utils/__pycache__/
