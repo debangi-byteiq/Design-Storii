@@ -1,16 +1,15 @@
 import re
 import time
+import requests
 import warnings
 from datetime import date
 import pandas as pd
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
-from models.kama_model import DataTable, Session
-from utils.currency import get_latest_currency_rate
+from models.data_model import DataTable, Session
 from utils.dictionaries_and_lists import network_errors
 from utils.functions import remove_non_numeric_chars, get_category, open_new_page,\
-    save_image_to_s3, update_flag_to_delete, save_to_excel, find_row_using_existing, ping_my_db, convert_currency,\
-    scroll_page
+    save_image_to_s3, update_flag_to_delete, save_to_excel, find_row_using_existing, ping_my_db, scroll_page
 
 
 def create_product_list(page):
@@ -20,9 +19,16 @@ def create_product_list(page):
 
     """
     links = list()
+    print("Collecting product links...")
     page.goto('https://manubhai.in/jewellery.php?category=3')
-    scroll_page(page, 'div.footer__copyright', 4)
+    scroll_page(page, 'div.footer__copyright', 5)
     soup = BeautifulSoup(page.content(), 'html.parser')
+    # url = "https://manubhai.in/jewellery.php"
+    # querystring = {"category": "3"}
+    # payload = ""
+    # headers = {"cookie": "PHPSESSID=4c0d831ef289f4761b5249c8a3c1e8c8"}
+    # response = requests.request("GET", url, data=payload, headers=headers, params=querystring)
+    # soup = BeautifulSoup(response.content, "html.parser")
     div_tags = soup.find_all('div', class_='d__product_card')
     for div_tag in div_tags:
         links.append(div_tag.find('a')['href'])
@@ -42,7 +48,7 @@ def find_metal_details(desc):
     details['MetalType'] = 'Gold'
     details['MetalColour'] = None
     try:
-        # details['MetailPurity'] = int(re.search(r'(\d+)kt', metal, re.IGNORECASE).group(1))
+        # details['MetalPurity'] = int(re.search(r'(\d+)kt', metal, re.IGNORECASE).group(1))
         details['MetalPurity'] = int(re.search(r"purity\s*(\d+)\s*K", desc, re.IGNORECASE).group(1))
     except:
         details['Metal'] = None
@@ -73,7 +79,7 @@ def find_diamond_details(desc):
 
 
 
-def find_product_details(page, soup, link, company_name, run_date, image_num, rates_inr, rates_usd):
+def find_product_details(page, soup, link, company_name, run_date, image_num):
     """
     This function is used to find the product details of the product.
     Args:
@@ -83,8 +89,6 @@ def find_product_details(page, soup, link, company_name, run_date, image_num, ra
         company_name: Name of the company that is being scraped.
         run_date: Date on which the script is being executed. This is called in order to create the unique id for the image
         image_num: Number of the image to be displayed on the image name, increments by one with every image saved.
-        rates_inr: Currency exchange rates for INR.
-        rates_usd: Currency exchange rates for USD.
 
     Returns: It returns a dictionary containing product details such as Product Name, S3 Image URL, Product Category, Price, Description and Product Weight.
 
@@ -98,7 +102,7 @@ def find_product_details(page, soup, link, company_name, run_date, image_num, ra
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
         }
         details['ImgUrl'] = save_image_to_s3(img_url, headers,
-                                             image_name=f'{company_name}_{run_date}_{image_num}.png')
+                                             image_name=f'{company_name}_{run_date}_{image_num}.png', company_name=company_name)
     except:
         details['ImgUrl'] = img_url
 
@@ -106,13 +110,9 @@ def find_product_details(page, soup, link, company_name, run_date, image_num, ra
     try:
         details['Price'] = float(remove_non_numeric_chars(soup.find('div', class_='d__product_price').text.strip()))
         details['Currency'] = 'INR'
-        details['PriceINR'] = convert_currency(details['Price'], rates_inr[details['Currency']])
-        details['PriceUSD'] = convert_currency(details['Price'], rates_usd[details['Currency']])
     except:
         details['Price'] = None
         details['Currency'] = None
-        details['PriceINR'] = None
-        details['PriceUSD'] = None
 
     try:
         div_tags = soup.find('div', class_='d-flex d__weight_container').find_all('div', class_='d__product_weight')
@@ -128,7 +128,7 @@ def find_product_details(page, soup, link, company_name, run_date, image_num, ra
     return details
 
 
-def scrape_product(link, page, company_name, country_name, run_date, image_num, rates_inr, rates_usd):
+def scrape_product(link, page, company_name, country_name, run_date, image_num):
     """
     This function is used to navigate to the product page and scrape the product details.
     Args:
@@ -138,8 +138,6 @@ def scrape_product(link, page, company_name, country_name, run_date, image_num, 
         country_name: Name of the country that the site is being scrapped.
         run_date: Date on which the site script is being executed.
         image_num: Number of the image to be displayed on the image name, increments by one with every image saved.
-        rates_inr: Currency exchange rates for INR.
-        rates_usd: Currency exchange rates for USD.
 
     Returns: It returns a dictionary containing two different object of the row, one to be added to mysql database, other a row list for the dataframe.
 
@@ -148,14 +146,13 @@ def scrape_product(link, page, company_name, country_name, run_date, image_num, 
     page.goto(link, timeout=60000)
     time.sleep(2)
     soup = BeautifulSoup(page.content(), 'html.parser')
-    product_details = find_product_details(page, soup, link, company_name, run_date, image_num, rates_inr, rates_usd)
+    product_details = find_product_details(page, soup, link, company_name, run_date, image_num)
     metal_details = find_metal_details(product_details['desc'])
     diamond_details = find_diamond_details(product_details['desc'])
     data['DB Row'] = DataTable(
         Country_Name=country_name, Company_Name=company_name, Product_Name=product_details['Name'],
         Product_URL=link, Image_URL=product_details['ImgUrl'], Category=product_details['Category'],
-        Currency=product_details['Currency'], Price=product_details['Price'], Price_In_INR=product_details['PriceINR'],
-        Price_In_USD=product_details['PriceUSD'], Description=product_details['Description'],
+        Currency=product_details['Currency'], Price=product_details['Price'],  Description=product_details['Description'],
         Product_Weight=product_details['ProductWeight'], Metal_Type=metal_details['MetalType'],
         Metal_Colour=metal_details['MetalColour'], Metal_Purity=metal_details['MetalPurity'],
         Metal_Weight=metal_details['MetalWeight'], Diamond_Colour=diamond_details['DiamondColour'],
@@ -164,8 +161,7 @@ def scrape_product(link, page, company_name, country_name, run_date, image_num, 
     )
     data['DF Row'] = [
         country_name, company_name, product_details['Name'], link, product_details['ImgUrl'],
-        product_details['Category'],  product_details['Currency'], product_details['Price'],
-        product_details['PriceINR'], product_details['PriceUSD'], product_details['Description'],
+        product_details['Category'],  product_details['Currency'], product_details['Price'], product_details['Description'],
         product_details['ProductWeight'], metal_details['MetalType'], metal_details['MetalColour'],
         metal_details['MetalPurity'], metal_details['MetalWeight'], diamond_details['DiamondColour'],
         diamond_details['DiamondClarity'], diamond_details['DiamondPieces'], diamond_details['DiamondWeight'], "New"]
@@ -175,10 +171,6 @@ def scrape_product(link, page, company_name, country_name, run_date, image_num, 
 def main():
     company_name = 'ManuBhai'
     country_name = 'India'
-    rates_inr = get_latest_currency_rate('INR')
-    rates_usd = get_latest_currency_rate('USD')
-    # rates_inr = {"INR": 1}
-    # rates_usd = {"INR": 1}
     run_date = date.today()
     warnings.filterwarnings("ignore")
     with sync_playwright() as p:
@@ -223,7 +215,7 @@ def main():
                         break
                     else:
                         # Else scrape the Product_URl
-                        data = scrape_product(link, page, company_name, country_name, run_date, image_num, rates_inr, rates_usd)
+                        data = scrape_product(link, page, company_name, country_name, run_date, image_num)
 
                         # Add the row to the session.
                         session.add(data['DB Row'])
