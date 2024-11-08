@@ -6,11 +6,10 @@ from datetime import date
 import pandas as pd
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
-from models.kama_model import DataTable, Session
-from utils.currency import get_latest_currency_rate
+from models.data_model import DataTable, Session
 from utils.dictionaries_and_lists import network_errors
 from utils.functions import remove_non_numeric_chars, get_category, find_metal_colour, open_new_page,\
-    save_image_to_s3, update_flag_to_delete, save_to_excel, find_row_using_existing, ping_my_db, convert_currency,\
+    save_image_to_s3, update_flag_to_delete, save_to_excel, find_row_using_existing, ping_my_db,\
     scroll_page, clear_popup
 
 
