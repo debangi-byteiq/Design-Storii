@@ -8,7 +8,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 
-from models.kama_model import DataTable, PriceTable, Session
+from models.data_model import DataTable, PriceTable, Session
 from utils.dictionaries_and_lists import network_errors
 from utils.functions import remove_non_numeric_chars, ping_my_db, find_row_using_existing, get_category, \
     find_metal_colour, open_new_page, save_image_to_s3, update_flag_to_delete, save_to_excel, update_converted_prices
@@ -167,7 +167,7 @@ def find_product_details(soup, link, page, company_name, run_date, image_num):
         headers = {
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
         }
-        details['ImgUrl'] = save_image_to_s3(img_url, headers, image_name=f'{company_name}_{run_date}_{image_num}.png')
+        details['ImgUrl'] = save_image_to_s3(img_url, headers,company_name, image_name=f'{company_name}_{run_date}_{image_num}.png')
     except:
         details['ImgUrl'] = img_url
     try:

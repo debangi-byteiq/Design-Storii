@@ -7,6 +7,7 @@ from datetime import date
 import pandas as pd
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
+from unicodedata import category
 
 from models.data_model import DataTable, Session
 from utils.dictionaries_and_lists import network_errors
@@ -90,23 +91,36 @@ def find_metal_details(desc, category):
         except:
             details['MetalPurity'] = None
         try:
-            details['MetalColour'] = find_metal_colour(category)
+            if 'rose gold' in category.lower():
+                details['MetalColour'] = 'Rose'
+            elif 'yellow gold' in category.lower():
+                details['MetalColour'] = 'Yellow'
+            elif 'white gold' in category.lower():
+                details['MetalColour'] = 'White'
+            else:
+                details['MetalColour'] = None
         except:
             details['MetalColour'] = None
+        try:
+            weight = re.search(r'(\d*\.?\d*)\s*g', desc['weight'], re.IGNORECASE).group(1)
+            details['MetalWeight'] = float(weight)
+        except:
+            details['MetalWeight'] = None
     elif 'silver' in desc['metal'].lower():
         details['MetalType'] = 'Silver'
         details['MetalPurity'] = None
         details['MetalColour'] = None
+        details['MetalWeight'] = None
     elif 'platinum' in desc['metal'].lower():
         details['MetalType'] = 'Platinum'
         details['MetalPurity'] = int(remove_non_numeric_chars(desc['purity']))
         details['MetalColour'] = None
+        details['MetalWeight'] = None
     else:
         details['MetalType'] = 'Other'
         details['MetalPurity'] = None
         details['MetalColour'] = None
-    details['MetalWeight'] = None
-
+        details['MetalWeight'] = None
     return details
 
 
@@ -196,7 +210,7 @@ def find_product_details(soup, link, page, company_name, run_date, image_num):
         headers = {
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
         }
-        details['ImgUrl'] = save_image_to_s3(img_url, headers, image_name=f'{company_name}_{run_date}_{image_num}.png')
+        details['ImgUrl'] = save_image_to_s3(img_url, headers,company_name, image_name=f'{company_name}_{run_date}_{image_num}.png')
     except:
         details['ImgUrl'] = img_url
     try:
@@ -221,11 +235,7 @@ def find_product_details(soup, link, page, company_name, run_date, image_num):
                 continue
     except:
         pass
-    try:
-        weight = re.search(r'(\d*\.?\d*)\s*g', details['weight'], re.IGNORECASE).group(1)
-        details['ProductWeight'] = float(weight)
-    except:
-        details['ProductWeight'] = None
+    details['ProductWeight'] = None
     return details
 
 
@@ -295,6 +305,7 @@ def main():
         page = open_new_page(browser)
         category_dict = create_category_list(page)
         print(f'{len(category_dict)} category links found.')
+        # print(category_dict)
         browser.close()
         image_num = 1
         for category, value in category_dict.items():
