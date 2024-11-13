@@ -22,19 +22,14 @@ from utils.functions import open_new_page,remove_non_numeric_chars, find_metal_c
 
 def create_product_list(page):
     links = list()
-    url_list = ["https://www.tanishq.com/jewelry/diamond","https://www.tanishq.com/jewelry/platinum-1"]
+    url_list = ["https://www.tanishq.co.in/shop/jewellery?lang=en_IN&prefn1=jewelleryType&prefv1=Diamond%20Jewellery&prefn2=priceRecordMissing&prefv2=false","https://www.tanishq.co.in/shop/jewellery?lang=en_IN&prefn1=jewelleryType&prefv1=Platinum%20Jewellery&prefn2=priceRecordMissing&prefv2=false/jewelry/platinum-1"]
     print('Extacting product links....')
     for url in url_list:
         page.goto(url)
         while True:
             try:
-                show_more_button = page.locator('button.show-more-btn')
-                if show_more_button.is_visible():
-                    show_more_button.click()
-                    time.sleep(2)
-                else:
-                    print('All products loaded.')
-                    break
+                page.locator('button.show-more-btn').click()
+                time.sleep(3)
             except:
                 break
 
@@ -213,7 +208,7 @@ def main():
     with sync_playwright() as p:
         row_list = list()
         max_retries = 3
-        browser = p.firefox.launch(headless=True)
+        browser = p.firefox.launch(headless=False)
         page = open_new_page(browser)
         product_links = create_product_list(page)
         browser.close()
