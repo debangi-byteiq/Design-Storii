@@ -22,7 +22,7 @@ from utils.functions import open_new_page,remove_non_numeric_chars, find_metal_c
 
 def create_product_list(page):
     links = list()
-    url_list = ["https://www.tanishq.co.in/shop/jewellery?lang=en_IN&prefn1=jewelleryType&prefv1=Diamond%20Jewellery&prefn2=priceRecordMissing&prefv2=false","https://www.tanishq.co.in/shop/jewellery?lang=en_IN&prefn1=jewelleryType&prefv1=Platinum%20Jewellery&prefn2=priceRecordMissing&prefv2=false/jewelry/platinum-1"]
+    url_list = ["https://www.tanishq.com/jewelry/diamond","https://www.tanishq.com/jewelry/platinum-1"]
     print('Extacting product links....')
     for url in url_list:
         page.goto(url)
