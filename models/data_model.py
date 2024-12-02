@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DECIMAL
+from sqlalchemy import Column, Integer, String, Text, DECIMAL, Date
 from utils.database import Base, engine, Session
 from config.database_bucket import TABLE_NAME
 
@@ -27,6 +27,8 @@ class DataTable(Base):
     Diamond_Pieces = Column(Integer)
     Diamond_Weight = Column(DECIMAL(precision=10, scale=3))
     Flag = Column(String(10), nullable=False)
+    Count = Column(Integer, default=0)
+    Run_Date = Column(Date)
 
     def __repr__(self):
         """

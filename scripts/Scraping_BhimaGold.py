@@ -201,14 +201,14 @@ def scrape_product(link, page, company_name, country_name, run_date, image_num):
         Metal_Colour=metal_details['MetalColour'], Metal_Purity=metal_details['MetalPurity'],
         Metal_Weight=metal_details['MetalWeight'], Diamond_Colour=diamond_details['DiamondColour'],
         Diamond_Clarity=diamond_details['DiamondClarity'], Diamond_Pieces=diamond_details['DiamondPieces'],
-        Diamond_Weight=diamond_details['DiamondWeight'], Flag="New"
+        Diamond_Weight=diamond_details['DiamondWeight'], Flag="New", Run_Date=run_date
     )
     data['DF Row'] = [
         country_name, company_name, product_details['Name'], link, product_details['ImgUrl'],
         product_details['Category'],  product_details['Currency'], product_details['Price'],
         product_details['Description'],product_details['ProductWeight'], metal_details['MetalType'],
         metal_details['MetalColour'],metal_details['MetalPurity'], metal_details['MetalWeight'],diamond_details['DiamondColour'],
-        diamond_details['DiamondClarity'], diamond_details['DiamondPieces'], diamond_details['DiamondWeight'], "New"]
+        diamond_details['DiamondClarity'], diamond_details['DiamondPieces'], diamond_details['DiamondWeight'], "New", run_date]
     return data
 
 
@@ -220,7 +220,7 @@ def main():
     with sync_playwright() as p:
         row_list = list()
         max_retries = 3
-        browser = p.firefox.launch(headless=True)
+        browser = p.firefox.launch(headless=False)
         page = open_new_page(browser)
         product_links = create_product_list(page)
         print(f'{len(product_links)} no. of diamond products loaded.', end='\n\n')
@@ -255,16 +255,20 @@ def main():
 
                     row = find_row_using_existing(existing_rows, link)
                     if row:
-                        # If exists change the flag to existing.
+                        # If the product exists, update the flag and increment the count.
                         row.Flag = 'Existing'
-                        print(f'Product already exists, changed flag to existing.\nURL: {link}')
-                        break
+                        row.Count += 1  # Increment the count for existing products
+                        print(f'Product already exists, incremented count. New count: {row.Count}\nURL: {link}')
+                        continue
                     else:
                         # Else scrape the Product_URl
                         data = scrape_product(link, page, company_name, country_name, run_date, image_num)
 
                         # Add the row to the session.
                         session.add(data['DB Row'])
+
+                        # Initialize count for new products
+                        data['DB Row'].Count = 1
 
                         # Add the row to the dataframe
                         row_list.append(data['DF Row'])

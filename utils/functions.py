@@ -101,7 +101,7 @@ def open_new_page(browser):
     Returns: It returns a new page object of the playwright library using browser context.
 
     """
-    agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100"
+    agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36 Edg/129.0.0.0"
     context = browser.new_context(
         user_agent=agent,
         color_scheme=r"light",
@@ -276,6 +276,7 @@ def find_row_using_existing(existing_rows, link):
     """
     for row in existing_rows:
         if row.Product_URL == link:
+            row.Count += 1  # Increment the count
             return row
     return None
 
