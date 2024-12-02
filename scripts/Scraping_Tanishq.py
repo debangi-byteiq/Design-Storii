@@ -28,13 +28,8 @@ def create_product_list(page):
         page.goto(url)
         while True:
             try:
-                show_more_button = page.locator('button.show-more-btn')
-                if show_more_button.is_visible():
-                    show_more_button.click()
-                    time.sleep(2)
-                else:
-                    print('All products loaded.')
-                    break
+                page.locator('button.show-more-btn').click()
+                time.sleep(3)
             except:
                 break
 
@@ -213,7 +208,7 @@ def main():
     with sync_playwright() as p:
         row_list = list()
         max_retries = 3
-        browser = p.firefox.launch(headless=True)
+        browser = p.firefox.launch(headless=False)
         page = open_new_page(browser)
         product_links = create_product_list(page)
         browser.close()
