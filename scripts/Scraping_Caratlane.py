@@ -12,13 +12,6 @@ from utils.dictionaries_and_lists import network_errors
 from utils.functions import clear_popup,remove_non_numeric_chars,  ping_my_db, find_row_using_existing, get_category, find_metal_colour,  open_new_page, save_image_to_s3, update_flag_to_delete, save_to_excel, scroll_page
 
 
-# def click_specification_button(page):
-#     accordians = page.query_selector('div.style__ProdAccordions-sc-1y2jmx4-29').query_selector_all("div.MuiPaper-root")
-#     for accordian in accordians:
-#         if "specification" in accordian.text_content().lower():
-#             accordian.query_selector('div.MuiButtonBase-root').click()
-
-
 def create_product_list(page):
     """
     This function uses the request library to fetch product links from the API library.
@@ -30,7 +23,7 @@ def create_product_list(page):
     page.goto('https://www.caratlane.com/jewellery/diamond.html', timeout=60000)
     time.sleep(2)
     clear_popup(page,'span.eddm8wl6.css-cby1fy.efp5dbi0')
-    scroll_page(page, 'div.css-yrr9vb.ek8iqxx18', 1)
+    scroll_page(page, 'div#footer_section', 0)
     div_tags = page.query_selector_all('div.css-17erzg6.e1fkptg30')
     for div_tag in div_tags:
         links.append(div_tag.query_selector('a[title="View Details"]').get_attribute('href'))
@@ -292,7 +285,7 @@ def main():
                     # Close and launch a new browser after every 25 links scraped.
                     if product_links.index(link) % 25 == 0 and product_links.index(link) != 0:
                         browser.close()
-                        browser = p.firefox.launch(headless=True)
+                        browser = p.chromium.launch(headless=True)
                         page = open_new_page(browser)
 
                     # Ping the db so that it maintains a persistent connection.
