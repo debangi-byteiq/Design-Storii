@@ -27,6 +27,8 @@ class DataTable(Base):
     Diamond_Pieces = Column(Integer)
     Diamond_Weight = Column(DECIMAL(precision=10, scale=3))
     Flag = Column(String(10), nullable=False)
+    Count = Column(Integer)
+    Run_Date = Column()
 
     def __repr__(self):
         """

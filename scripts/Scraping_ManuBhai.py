@@ -157,21 +157,21 @@ def scrape_product(link, page, company_name, country_name, run_date, image_num):
         Metal_Colour=metal_details['MetalColour'], Metal_Purity=metal_details['MetalPurity'],
         Metal_Weight=metal_details['MetalWeight'], Diamond_Colour=diamond_details['DiamondColour'],
         Diamond_Clarity=diamond_details['DiamondClarity'], Diamond_Pieces=diamond_details['DiamondPieces'],
-        Diamond_Weight=diamond_details['DiamondWeight'], Flag="New"
+        Diamond_Weight=diamond_details['DiamondWeight'], Count=1,Run_Date = run_date, Flag="New"
     )
     data['DF Row'] = [
         country_name, company_name, product_details['Name'], link, product_details['ImgUrl'],
         product_details['Category'],  product_details['Currency'], product_details['Price'], product_details['Description'],
         product_details['ProductWeight'], metal_details['MetalType'], metal_details['MetalColour'],
         metal_details['MetalPurity'], metal_details['MetalWeight'], diamond_details['DiamondColour'],
-        diamond_details['DiamondClarity'], diamond_details['DiamondPieces'], diamond_details['DiamondWeight'], "New"]
+        diamond_details['DiamondClarity'], diamond_details['DiamondPieces'], diamond_details['DiamondWeight'], run_date ,1, "New"]
     return data
 
 
 def main():
     company_name = 'ManuBhai'
     country_name = 'India'
-    run_date = date.today()
+    run_date = str(date.today())
     warnings.filterwarnings("ignore")
     with sync_playwright() as p:
         row_list = list()
@@ -211,8 +211,9 @@ def main():
                     if row:
                         # If exists change the flag to existing.
                         row.Flag = 'Existing'
-                        print(f'Product already exists, changed flag to existing.\nURL: {link}')
-                        break
+                        row.Count += 1
+                        print(f'Product already exists, incremented count. New count: {row.Count}\nURL: {link}')
+                        continue
                     else:
                         # Else scrape the Product_URl
                         data = scrape_product(link, page, company_name, country_name, run_date, image_num)

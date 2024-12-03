@@ -21,7 +21,9 @@ columns_list = [
     'Diamond_Clarity',
     'Diamond_Pieces',
     'Diamond_Weight',
-    'Flag'
+    'Flag',
+    'Count',
+    'Run_Date'
 ]
 
 
