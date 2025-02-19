@@ -261,6 +261,7 @@ def find_row_using_existing(existing_rows, link):
     """
     for row in existing_rows:
         if row.Product_URL == link:
+            row.Count += 1
             return row
     return None
 

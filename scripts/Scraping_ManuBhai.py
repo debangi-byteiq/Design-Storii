@@ -157,14 +157,14 @@ def scrape_product(link, page, company_name, country_name, run_date, image_num):
         Metal_Colour=metal_details['MetalColour'], Metal_Purity=metal_details['MetalPurity'],
         Metal_Weight=metal_details['MetalWeight'], Diamond_Colour=diamond_details['DiamondColour'],
         Diamond_Clarity=diamond_details['DiamondClarity'], Diamond_Pieces=diamond_details['DiamondPieces'],
-        Diamond_Weight=diamond_details['DiamondWeight'], Count=1,Run_Date = run_date, Flag="New"
+        Diamond_Weight=diamond_details['DiamondWeight'], Count=1, Run_Date=run_date, Flag="New"
     )
     data['DF Row'] = [
         country_name, company_name, product_details['Name'], link, product_details['ImgUrl'],
         product_details['Category'],  product_details['Currency'], product_details['Price'], product_details['Description'],
         product_details['ProductWeight'], metal_details['MetalType'], metal_details['MetalColour'],
         metal_details['MetalPurity'], metal_details['MetalWeight'], diamond_details['DiamondColour'],
-        diamond_details['DiamondClarity'], diamond_details['DiamondPieces'], diamond_details['DiamondWeight'], run_date ,1, "New"]
+        diamond_details['DiamondClarity'], diamond_details['DiamondPieces'], diamond_details['DiamondWeight'], 1, run_date, "New"]
     return data
 
 
@@ -211,9 +211,9 @@ def main():
                     if row:
                         # If exists change the flag to existing.
                         row.Flag = 'Existing'
-                        row.Count += 1
+                        # row.Count += 1
                         print(f'Product already exists, incremented count. New count: {row.Count}\nURL: {link}')
-                        continue
+                        break
                     else:
                         # Else scrape the Product_URl
                         data = scrape_product(link, page, company_name, country_name, run_date, image_num)

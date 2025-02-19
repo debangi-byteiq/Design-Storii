@@ -219,27 +219,30 @@ def scrape_product(link, page, company_name, country_name, run_date, image_num):
     data['DB Row'] = DataTable(
         Country_Name=country_name, Company_Name=company_name, Product_Name=product_details['Name'],
         Product_URL=link, Image_URL=product_details['ImgUrl'], Category=product_details['Category'],
-        Currency=product_details['Currency'], Price=product_details['Price'], Description=product_details['Description'],
-        Product_Weight=product_details['ProductWeight'], Metal_Type=metal_details['MetalType'],
-        Metal_Colour=metal_details['MetalColour'], Metal_Purity=metal_details['MetalPurity'],
-        Metal_Weight=metal_details['MetalWeight'], Diamond_Colour=diamond_details['DiamondColour'],
-        Diamond_Clarity=diamond_details['DiamondClarity'], Diamond_Pieces=diamond_details['DiamondPieces'],
-        Diamond_Weight=diamond_details['DiamondWeight'], Flag="New"
+        Currency=product_details['Currency'], Price=product_details['Price'],
+        Description=product_details['Description'], Product_Weight=product_details['ProductWeight'],
+        Metal_Type=metal_details['MetalType'], Metal_Colour=metal_details['MetalColour'],
+        Metal_Purity=metal_details['MetalPurity'], Metal_Weight=metal_details['MetalWeight'],
+        Diamond_Colour=diamond_details['DiamondColour'], Diamond_Clarity=diamond_details['DiamondClarity'],
+        Diamond_Pieces=diamond_details['DiamondPieces'], Diamond_Weight=diamond_details['DiamondWeight'], Flag="New",
+        Count=1, Run_Date=run_date
     )
     data['DF Row'] = [
         country_name, company_name, product_details['Name'], link, product_details['ImgUrl'],
-        product_details['Category'],  product_details['Currency'], product_details['Price'],
+        product_details['Category'], product_details['Currency'], product_details['Price'],
         product_details['Description'],
         product_details['ProductWeight'], metal_details['MetalType'], metal_details['MetalColour'],
         metal_details['MetalPurity'], metal_details['MetalWeight'], diamond_details['DiamondColour'],
-        diamond_details['DiamondClarity'], diamond_details['DiamondPieces'], diamond_details['DiamondWeight'], "New"]
+        diamond_details['DiamondClarity'], diamond_details['DiamondPieces'], diamond_details['DiamondWeight'], "New",
+        1, run_date
+    ]
     return data
 
 
 def main():
     company_name = 'Orra'
     country_name = 'India'
-    run_date = date.today()
+    run_date = str(date.today())
     warnings.filterwarnings("ignore")
     with sync_playwright() as p:
         row_list = list()
@@ -251,8 +254,6 @@ def main():
         page = open_new_page(browser)
         # print(scrape_product('https://www.orra.co.in/navratna-multi-stone-pendant-scy16004-d307r0b', page, company_name, country_name, run_date, 4))
         # exit()
-
-
 
         # Create a database session.
         session = Session()

@@ -55,6 +55,7 @@ def create_product_list():
                 time.sleep(1)
     return list(set(links))
 
+
 def find_metal_details(soup):
     """
     This function is used to find the metal details of the product.
@@ -93,7 +94,6 @@ def find_diamond_details(soup):
     This function is used to find the diamond details of the product.
     Args:
         soup: Contains the html content of the webpage.
-
     Returns: It returns a dictionary containing diamond colour, clarity, number of pieces and total diamond carat weight.
 
     """
